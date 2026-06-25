@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Api fetch Gifs</title>
+</head>
+<body>
+    
+   <input type="text" placeholder="Search Gifs...">
+   <button id="search-btn">Search</button>
+   <button id="random-btn" type="button">Fetch a random gif</button>
+   <br><br>
+   <img src="#" alt="Gif" width="300px">
+   <p style="color: red;"></p>
+
+<script>
+const searchInput = document.querySelector("input");
+const searchBtn = document.querySelector('#search-btn');
+const randomBtn = document.querySelector('#random-btn');
+const img = document.querySelector("img");
+const errorP = document.querySelector('p');
+
+const apiKey = "dU6pTtBhaTxZRJn89CS6R4CSwNyzNlis";
+
+function fetchGif(searchTerm = "random") {
+    errorP.textContent = "";
+
+    let url = "";
+
+    if (searchTerm === "random") {
+        url = `https://api.giphy.com/v1/gifs/random?api_key=${apiKey}`;
+    } else {
+        url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${searchTerm}&limit=1`;
+    }
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP Error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(response => {
+            if (searchTerm === "random") {
+                img.src = response.data.images.original.url;
+            } else {
+                if (response.data.length === 0) {
+                    throw new Error("No GIF found.");
+                }
+
+                img.src = response.data[0].images.original.url;
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            errorP.textContent = error.message;
+        });
+}
+
+searchBtn.addEventListener("click", () => {
+    const query = searchInput.value.trim();
+    if (query) fetchGif(query);
+});
+
+randomBtn.addEventListener("click", () => {
+    fetchGif("random");
+});
+
+// Load a random GIF immediately on page load
+fetchGif('random');
+</script>
+
+</body>
+</html>
